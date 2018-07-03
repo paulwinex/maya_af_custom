@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source ../main_env.sh    # todo: change path
+
+export PYTHONPATH=${MTOA_PATH}/scripts:${PYTHONPATH}
+export ARNOLD_PLUGIN_PATH=${MTOA_PATH}/shaders
+export PATH=${MTOA_PATH}/bin:${PATH}
+#export solidangle_LICENSE=
+
+# start kick
+${MTOA_PATH}/bin/kick "$@"
