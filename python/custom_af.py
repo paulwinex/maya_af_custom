@@ -8,7 +8,7 @@ if os.getenv('CGRU_LOCATION') and os.getenv('MAYA_CGRU_LOCATION'):
     mel.source(cgru_setup)
 
 
-def get_cgru_root(os=None):
+def get_cgru_root():
     return os.getenv('CGRU_PATH_REMOTE')
 
 
