@@ -51,6 +51,7 @@ class meArnoldRenderVersion(meArnoldRender.meArnoldRender):
         self.generate_cmd_script()
 
     def generate_cmd_script(self):
+        print 'GENERATE SCRIPTS'
         inp = self.get_assgen_options('defaultRenderLayer').replace('"', '') + self.job_param[
             'job_separator'] + '@{}@'.format('#' * self.job_param['job_padding']) + '.ass'
         inp = inp.replace('-filename', '').strip()
@@ -62,8 +63,11 @@ class meArnoldRenderVersion(meArnoldRender.meArnoldRender):
         cmd = 'kick -i "{}" -v 2 -nstdin -dw -dp'.format(inp.replace('\\', '/'))
         job_file['job']['blocks'][0]['command'] = cmd
         job_file['job']['blocks'][0]['working_directory'] = os.path.dirname(inp)
-        json.dump(job_file, open(os.path.normpath(os.path.join(os.path.dirname(inp), 'render.sh')), 'w'), indent=2)
-
+        job_josn = os.path.normpath(
+            os.path.join(os.path.dirname(inp), 'job.json')
+            )
+        json.dump(job_file, open(job_josn, 'w'), indent=2)
+        print 'JOB:', job_josn
         CGRU_ROOT = get_cgru_root()
 # {CGRU_ROOT}\python\python.exe "{CGRU_ROOT}\afanasy\python\afjob.py" "{INP}" {START} {END} -by {STEP} -fpt 1 -seq 1 -pwd "{PWD}" -name "{NAME}"  -pause
         cmd_win = r'''
@@ -71,7 +75,7 @@ set START_DIR=%~dp0
 set PYTHONPATH={CGRU_ROOT}\afanasy\python;{CGRU_ROOT}\lib\python;%PYTHONPATH%
 cd {CGRU_ROOT}
 call {CGRU_ROOT}\setup.cmd
-{CGRU_ROOT}\python\python.exe "{CGRU_ROOT}\afanasy\bin\afcmd.exe" json send "%START_DIR%\job.json"
+"{CGRU_ROOT}\afanasy\bin\afcmd.exe" json send "%START_DIR%\job.json"
         '''.format(
             CGRU_ROOT=CGRU_ROOT,
             # INP=inp,
@@ -81,7 +85,9 @@ call {CGRU_ROOT}\setup.cmd
             # PWD=os.path.dirname(inp),
             # NAME=os.path.basename(sceneName())
         )
-        open(os.path.normpath(os.path.join(os.path.dirname(inp), 'render.cmd')), 'w').write(cmd_win)
+        out_cmd = os.path.normpath(os.path.join(os.path.dirname(inp), 'render.cmd'))
+        open(out_cmd, 'w').write(cmd_win)
+        print out_cmd
 
         CGRU_ROOT = get_cgru_root()
 #         cmd_bash = r'''export PYTHONPATH={CGRU_ROOT}/afanasy/python:{CGRU_ROOT}/lib/python:${{PYTHONPATH}}
@@ -102,7 +108,7 @@ export START_DIR="$( cd "$( dirname "${{BASH_SOURCE[0]}}" )" && pwd )"
 export PYTHONPATH={CGRU_ROOT}/afanasy/python:{CGRU_ROOT}/lib/python:${{PYTHONPATH}}
 cd {CGRU_ROOT}
 source {CGRU_ROOT}/setup.sh
-python "{CGRU_ROOT}/afanasy/bin/afcmd" json send ${{START_DIR}}/job.json
+"{CGRU_ROOT}/afanasy/bin/afcmd" json send ${{START_DIR}}/job.json
 '''.format(
             CGRU_ROOT=CGRU_ROOT,
             # INP=inp,
@@ -112,12 +118,15 @@ python "{CGRU_ROOT}/afanasy/bin/afcmd" json send ${{START_DIR}}/job.json
             # PWD=os.path.dirname(inp),
             # NAME=os.path.basename(sceneName())
         ).replace('\\', '/')
-
-        open(os.path.normpath(os.path.join(os.path.dirname(inp), 'render.sh')), 'w').write(cmd_bash)
+        out_sh = os.path.normpath(os.path.join(os.path.dirname(inp), 'render.sh'))
+        open(out_sh, 'w').write(cmd_bash)
+        print out_sh
+        os.popen('xdg-open {}'.format(os.path.dirname(out_sh)))
 
 
 
 def replace_class():
+    print '='*50, 'REPLACE AFANASY SUBMITTER CLASS'
     meArnoldRender.meArnoldRender = meArnoldRenderVersion
     print('CGRU Arnold updated')
 
